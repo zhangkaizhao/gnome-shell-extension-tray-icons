@@ -1,5 +1,4 @@
 const GLib = imports.gi.GLib;
-const Lang = imports.lang;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const Shell = imports.gi.Shell;
@@ -62,11 +61,11 @@ function onTrayIconAdded(o, icon, role, delay=1000) {
         icon.click(event);
     });
 
-    GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, Lang.bind(this, function(){
+    GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
         iconContainer.visible = true;
         iconsContainer.actor.visible = true;
         return GLib.SOURCE_REMOVE;
-    }));
+    });
 
     iconsBoxLayout.insert_child_at_index(iconContainer, 0);
     icon.reactive = true;
@@ -93,16 +92,16 @@ function onTrayIconRemoved(o, icon) {
 function connectPanelChildSignals() {
     panelChildSignals = {
         left: {
-            add: Main.panel._leftBox.connect('actor_added', Lang.bind(this, onPanelChange)),
-            del: Main.panel._leftBox.connect('actor_removed', Lang.bind(this, onPanelChange))
+            add: Main.panel._leftBox.connect('actor_added', onPanelChange),
+            del: Main.panel._leftBox.connect('actor_removed', onPanelChange)
         },
         center: {
-            add: Main.panel._centerBox.connect('actor_added', Lang.bind(this, onPanelChange)),
-            del: Main.panel._centerBox.connect('actor_removed', Lang.bind(this, onPanelChange))
+            add: Main.panel._centerBox.connect('actor_added', onPanelChange),
+            del: Main.panel._centerBox.connect('actor_removed', onPanelChange)
         },
         right: {
-            add: Main.panel._rightBox.connect('actor_added', Lang.bind(this, onPanelChange)),
-            del: Main.panel._rightBox.connect('actor_removed', Lang.bind(this, onPanelChange))
+            add: Main.panel._rightBox.connect('actor_added', onPanelChange),
+            del: Main.panel._rightBox.connect('actor_removed', onPanelChange)
         }
     }
 }
