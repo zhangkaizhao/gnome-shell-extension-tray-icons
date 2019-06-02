@@ -5,6 +5,8 @@ const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 const System = imports.system;
 
+const TRAY_ICON_SIZE = 22;
+
 let tray = null;
 let icons = [];
 let iconsBoxLayout = null;
@@ -69,12 +71,30 @@ function onTrayIconAdded(o, icon, role, delay=1000) {
 
     iconsBoxLayout.insert_child_at_index(iconContainer, 0);
     icon.reactive = true;
+    ensureIconSize(icon);
     icons.push(icon);
+}
+
+function ensureIconSize(icon) {
+    // imports.ui.main.panel.height => 28
+    // imports.ui.panel.PANEL_ICON_SIZE => 16
+    // But most icons' size is 22.
+
+    let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+    let scaledIconSize = TRAY_ICON_SIZE * scaleFactor;
+
+    let iconSize = icon.get_size()[0];
+    // Some applications may use `imports.gi.Gtk.IconSize` e.g. Pidgin.
+    // See https://valadoc.org/gtk+-3.0/Gtk.IconSize.html .
+    if (iconSize != scaledIconSize) {
+        icon.get_parent().set_size(scaledIconSize, scaledIconSize);
+        icon.set_size(scaledIconSize, scaledIconSize);
+    }
 }
 
 function onTrayIconRemoved(o, icon) {
     if (icons.indexOf(icon) == -1) {
-      return;
+        return;
     }
 
     let parent = icon.get_parent();
