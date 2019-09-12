@@ -97,11 +97,19 @@ function onTrayIconRemoved(o, icon) {
         return;
     }
 
-    let parent = icon.get_parent();
-    if (parent) {
-         parent.destroy();
+    let iconParent = icon.get_parent();
+    if (iconParent) {
+         iconParent.destroy();
     }
-    icon.destroy();
+
+    // A warning like this will logged if we try to call `destroy()` on `icon` here:
+    // """
+    // Object Shell.TrayIcon (0x56014a3370e0), has been already deallocated — impossible to access it. This might be
+    // caused by the object having been destroyed from C code using something such as destroy(), dispose(), or remove()
+    // vfuncs.
+    // """
+    // icon.destroy();
+
     icons.splice(icons.indexOf(icon), 1);
 
     if (icons.length === 0) {
