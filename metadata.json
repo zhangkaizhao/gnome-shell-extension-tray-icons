@@ -4,8 +4,8 @@
   "description": "Tray icons",
   "url": "https://github.com/zhangkaizhao/gnome-shell-extension-tray-icons",
   "shell-version": [
-    "3.28",
     "3.30",
-    "3.32.2"
+    "3.32.2",
+    "3.34"
   ]
 }

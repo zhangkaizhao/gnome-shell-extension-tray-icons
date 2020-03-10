@@ -64,13 +64,8 @@ function createTray() {
     tray = new Shell.TrayManager();
     tray.connect('tray-icon-added', onTrayIconAdded);
     tray.connect('tray-icon-removed', onTrayIconRemoved);
-    if (global.screen) {
-        // For GNOME 3.28
-        tray.manage_screen(global.screen, Main.panel.actor);
-    } else {
-        // For GNOME 3.30
-        tray.manage_screen(Main.panel.actor);
-    }
+    // Only support GNOME Shell 3.30+
+    tray.manage_screen(Main.panel);
     placeTray();
 }
 
@@ -81,7 +76,7 @@ function createIconsContainer() {
 
     // An empty ButtonBox will still display padding, therefore create it without visibility.
     iconsContainer = new PanelMenu.ButtonBox({visible: false});
-    iconsContainer.actor.add_actor(iconsBoxLayout);
+    iconsContainer.add_actor(iconsBoxLayout);
 }
 
 function onTrayIconAdded(o, icon, role, delay=1000) {
@@ -98,7 +93,7 @@ function onTrayIconAdded(o, icon, role, delay=1000) {
 
     GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
         iconContainer.visible = true;
-        iconsContainer.actor.visible = true;
+        iconsContainer.show();
         return GLib.SOURCE_REMOVE;
     });
 
@@ -146,7 +141,7 @@ function onTrayIconRemoved(o, icon) {
     icons.splice(icons.indexOf(icon), 1);
 
     if (icons.length === 0) {
-        iconsContainer.actor.visible = false;
+        iconsContainer.hide();
     }
 }
 
@@ -187,18 +182,18 @@ function onPanelChange(actor, child) {
 }
 
 function placeTray() {
-    let parent = iconsContainer.actor.get_parent();
+    let parent = iconsContainer.get_parent();
     if (parent) {
-        parent.remove_actor(iconsContainer.actor);
+        parent.remove_actor(iconsContainer);
     }
 
     // panel box
     let box = Main.panel._rightBox;
-    box.insert_child_at_index(iconsContainer.actor, 0);
+    box.insert_child_at_index(iconsContainer, 0);
 }
 
 function destroyTray() {
-    iconsContainer.actor.destroy();
+    iconsContainer.destroy();
     iconsContainer = null;
     iconsBoxLayout = null;
     icons = [];
