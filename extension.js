@@ -1,4 +1,5 @@
 const GLib = imports.gi.GLib;
+const GnomeSession = imports.misc.gnomeSession;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const Shell = imports.gi.Shell;
@@ -13,16 +14,48 @@ let iconsBoxLayout = null;
 let iconsContainer = null;
 let panelChildSignals = {};
 
+// For ignoring recreating tray after session idle
+let _presence = null;
+let _statusChangedId = null;
+let _isSessionIdle = false;
+let _ignoreRecreatingTray = false;
+
 function init() {}
 
 function enable() {
-    GLib.idle_add(GLib.PRIORITY_LOW, createTray);
-    connectPanelChildSignals();
+    if (!_ignoreRecreatingTray) {
+        GLib.idle_add(GLib.PRIORITY_LOW, createTray);
+        connectPanelChildSignals();
+        _connectSessionStatusChanged();
+    } else {
+        _ignoreRecreatingTray = false;
+    }
+}
+
+function _connectSessionStatusChanged() {
+    _presence = new GnomeSession.Presence();
+    _statusChangedId = _presence.connectSignal("StatusChanged", (proxy, senderName, [_status]) => {
+        if (_status == GnomeSession.PresenceStatus.IDLE) {
+            // The disable() of extension is called quickly after session status changed to idle.
+            // We make this mark and ignore recreating tray in the following disable(), and then
+            // reset the mark to avoid normal usage of extension enable/disable switch.
+            _isSessionIdle = true;
+        } else if (_status == GnomeSession.PresenceStatus.AVAILABLE) {
+            // After session status changed from idle to available, e.g. unlocking screen,
+            // we can catch this signal, but seems there is no easy way to avoid recreating tray.
+            // We still do not cover the case when the user locks the screen manually and then unlocks it.
+        }
+    });
 }
 
 function disable() {
-    disconnectPanelChildSignals();
-    destroyTray();
+    if (_isSessionIdle) {
+        _isSessionIdle = false;
+        _ignoreRecreatingTray = true;
+    } else {
+        disconnectPanelChildSignals();
+        destroyTray();
+    }
 }
 
 function createTray() {
@@ -171,6 +204,13 @@ function destroyTray() {
     icons = [];
 
     tray = null;
+
+    if (_statusChangedId) {
+        _presence.disconnectSignal(_statusChangedId);
+    }
+    _presence = null;
+    _statusChangedId = null;
+
     // force finalizing tray to unmanage screen
     System.gc();
 }
