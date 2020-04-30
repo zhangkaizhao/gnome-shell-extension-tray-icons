@@ -119,8 +119,10 @@ function ensureIconSize(icon) {
     // See https://valadoc.org/gtk+-3.0/Gtk.IconSize.html .
     if (iconSize != scaledIconSize) {
         icon.get_parent().set_size(scaledIconSize, scaledIconSize);
-        icon.set_size(scaledIconSize, scaledIconSize);
+        //icon.set_size(scaledIconSize, scaledIconSize);
+        icon.set_height(scaledIconSize);
     }
+    icon.set_y_align(Clutter.ActorAlign.CENTER);
 }
 
 function onTrayIconRemoved(o, icon) {
