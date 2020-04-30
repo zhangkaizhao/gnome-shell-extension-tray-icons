@@ -1,3 +1,4 @@
+const Clutter = imports.gi.Clutter;
 const GLib = imports.gi.GLib;
 const GnomeSession = imports.misc.gnomeSession;
 const Main = imports.ui.main;
@@ -92,8 +93,10 @@ function onTrayIconAdded(o, icon, role, delay=1000) {
     });
 
     GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
-        iconContainer.visible = true;
-        iconsContainer.show();
+        if (iconContainer) {
+          iconContainer.visible = true;
+          iconsContainer.show();
+        }
         return GLib.SOURCE_REMOVE;
     });
 
