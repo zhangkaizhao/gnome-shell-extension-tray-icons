@@ -86,6 +86,7 @@ function onTrayIconAdded(o, icon, role, delay=1000) {
     icon.connect("destroy", function() {
         icon.clear_effects();
         iconContainer.destroy();
+        iconContainer = null;
     });
 
     iconContainer.connect('button-release-event', function(actor, event) {
