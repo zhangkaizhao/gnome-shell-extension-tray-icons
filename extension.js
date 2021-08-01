@@ -7,7 +7,7 @@ const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 const System = imports.system;
 
-const TRAY_ICON_SIZE = 22;
+const TRAY_ICON_SIZE = 18;
 
 let tray = null;
 let icons = [];
